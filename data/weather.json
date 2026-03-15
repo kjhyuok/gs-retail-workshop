@@ -1,0 +1,42 @@
+{
+  "강남": {
+    "location": "서울 강남",
+    "date": "2026-03-16",
+    "weather": "맑음",
+    "temp_high": 18,
+    "temp_low": 7,
+    "precipitation_prob": 10
+  },
+  "송파": {
+    "location": "서울 송파",
+    "date": "2026-03-16",
+    "weather": "맑음",
+    "temp_high": 17,
+    "temp_low": 6,
+    "precipitation_prob": 15
+  },
+  "마포": {
+    "location": "서울 마포",
+    "date": "2026-03-16",
+    "weather": "흐림",
+    "temp_high": 16,
+    "temp_low": 6,
+    "precipitation_prob": 40
+  },
+  "서대문": {
+    "location": "서울 서대문",
+    "date": "2026-03-16",
+    "weather": "흐림",
+    "temp_high": 15,
+    "temp_low": 5,
+    "precipitation_prob": 45
+  },
+  "영등포": {
+    "location": "서울 영등포",
+    "date": "2026-03-16",
+    "weather": "맑음",
+    "temp_high": 17,
+    "temp_low": 7,
+    "precipitation_prob": 10
+  }
+}

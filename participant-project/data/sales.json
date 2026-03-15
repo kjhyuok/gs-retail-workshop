@@ -1,0 +1,402 @@
+{
+  "역삼역점": {
+    "store": "역삼역점",
+    "store_id": "GS001",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 469,
+        "beverage": 1116,
+        "snack": 913,
+        "household": 128
+      },
+      {
+        "week": 2,
+        "dosirak": 441,
+        "beverage": 976,
+        "snack": 799,
+        "household": 140
+      },
+      {
+        "week": 3,
+        "dosirak": 405,
+        "beverage": 1013,
+        "snack": 872,
+        "household": 141
+      },
+      {
+        "week": 4,
+        "dosirak": 422,
+        "beverage": 1097,
+        "snack": 899,
+        "household": 126
+      }
+    ],
+    "daily_average": {
+      "dosirak": 64,
+      "beverage": 154,
+      "snack": 121,
+      "household": 20
+    }
+  },
+  "잠실새내점": {
+    "store": "잠실새내점",
+    "store_id": "GS002",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 382,
+        "beverage": 968,
+        "snack": 591,
+        "household": 90
+      },
+      {
+        "week": 2,
+        "dosirak": 374,
+        "beverage": 1021,
+        "snack": 683,
+        "household": 102
+      },
+      {
+        "week": 3,
+        "dosirak": 352,
+        "beverage": 1095,
+        "snack": 628,
+        "household": 99
+      },
+      {
+        "week": 4,
+        "dosirak": 373,
+        "beverage": 1024,
+        "snack": 690,
+        "household": 99
+      }
+    ],
+    "daily_average": {
+      "dosirak": 50,
+      "beverage": 143,
+      "snack": 92,
+      "household": 14
+    }
+  },
+  "테헤란로점": {
+    "store": "테헤란로점",
+    "store_id": "GS003",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 416,
+        "beverage": 1027,
+        "snack": 766,
+        "household": 133
+      },
+      {
+        "week": 2,
+        "dosirak": 467,
+        "beverage": 1055,
+        "snack": 811,
+        "household": 131
+      },
+      {
+        "week": 3,
+        "dosirak": 433,
+        "beverage": 1179,
+        "snack": 857,
+        "household": 143
+      },
+      {
+        "week": 4,
+        "dosirak": 425,
+        "beverage": 1134,
+        "snack": 776,
+        "household": 136
+      }
+    ],
+    "daily_average": {
+      "dosirak": 65,
+      "beverage": 155,
+      "snack": 119,
+      "household": 20
+    }
+  },
+  "홍대입구점": {
+    "store": "홍대입구점",
+    "store_id": "GS004",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 635,
+        "beverage": 1661,
+        "snack": 1046,
+        "household": 171
+      },
+      {
+        "week": 2,
+        "dosirak": 573,
+        "beverage": 1501,
+        "snack": 1042,
+        "household": 205
+      },
+      {
+        "week": 3,
+        "dosirak": 639,
+        "beverage": 1516,
+        "snack": 1140,
+        "household": 185
+      },
+      {
+        "week": 4,
+        "dosirak": 644,
+        "beverage": 1562,
+        "snack": 1053,
+        "household": 179
+      }
+    ],
+    "daily_average": {
+      "dosirak": 85,
+      "beverage": 225,
+      "snack": 158,
+      "household": 27
+    }
+  },
+  "신촌역점": {
+    "store": "신촌역점",
+    "store_id": "GS005",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 363,
+        "beverage": 938,
+        "snack": 869,
+        "household": 140
+      },
+      {
+        "week": 2,
+        "dosirak": 340,
+        "beverage": 903,
+        "snack": 729,
+        "household": 143
+      },
+      {
+        "week": 3,
+        "dosirak": 392,
+        "beverage": 978,
+        "snack": 721,
+        "household": 136
+      },
+      {
+        "week": 4,
+        "dosirak": 407,
+        "beverage": 999,
+        "snack": 865,
+        "household": 150
+      }
+    ],
+    "daily_average": {
+      "dosirak": 53,
+      "beverage": 142,
+      "snack": 113,
+      "household": 20
+    }
+  },
+  "강남역점": {
+    "store": "강남역점",
+    "store_id": "GS006",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 347,
+        "beverage": 1374,
+        "snack": 884,
+        "household": 151
+      },
+      {
+        "week": 2,
+        "dosirak": 360,
+        "beverage": 1458,
+        "snack": 1031,
+        "household": 146
+      },
+      {
+        "week": 3,
+        "dosirak": 364,
+        "beverage": 1251,
+        "snack": 1038,
+        "household": 165
+      },
+      {
+        "week": 4,
+        "dosirak": 349,
+        "beverage": 1374,
+        "snack": 979,
+        "household": 143
+      }
+    ],
+    "daily_average": {
+      "dosirak": 52,
+      "beverage": 191,
+      "snack": 137,
+      "household": 22
+    }
+  },
+  "잠실점": {
+    "store": "잠실점",
+    "store_id": "GS007",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 315,
+        "beverage": 918,
+        "snack": 664,
+        "household": 121
+      },
+      {
+        "week": 2,
+        "dosirak": 376,
+        "beverage": 1015,
+        "snack": 706,
+        "household": 102
+      },
+      {
+        "week": 3,
+        "dosirak": 376,
+        "beverage": 1037,
+        "snack": 674,
+        "household": 111
+      },
+      {
+        "week": 4,
+        "dosirak": 319,
+        "beverage": 1001,
+        "snack": 774,
+        "household": 103
+      }
+    ],
+    "daily_average": {
+      "dosirak": 50,
+      "beverage": 136,
+      "snack": 105,
+      "household": 16
+    }
+  },
+  "석촌점": {
+    "store": "석촌점",
+    "store_id": "GS008",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 317,
+        "beverage": 903,
+        "snack": 634,
+        "household": 131
+      },
+      {
+        "week": 2,
+        "dosirak": 302,
+        "beverage": 922,
+        "snack": 692,
+        "household": 129
+      },
+      {
+        "week": 3,
+        "dosirak": 318,
+        "beverage": 962,
+        "snack": 582,
+        "household": 119
+      },
+      {
+        "week": 4,
+        "dosirak": 311,
+        "beverage": 975,
+        "snack": 595,
+        "household": 118
+      }
+    ],
+    "daily_average": {
+      "dosirak": 46,
+      "beverage": 137,
+      "snack": 90,
+      "household": 18
+    }
+  },
+  "선릉점": {
+    "store": "선릉점",
+    "store_id": "GS009",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 405,
+        "beverage": 1196,
+        "snack": 789,
+        "household": 173
+      },
+      {
+        "week": 2,
+        "dosirak": 356,
+        "beverage": 1212,
+        "snack": 905,
+        "household": 170
+      },
+      {
+        "week": 3,
+        "dosirak": 375,
+        "beverage": 1383,
+        "snack": 884,
+        "household": 157
+      },
+      {
+        "week": 4,
+        "dosirak": 347,
+        "beverage": 1290,
+        "snack": 820,
+        "household": 166
+      }
+    ],
+    "daily_average": {
+      "dosirak": 54,
+      "beverage": 187,
+      "snack": 119,
+      "household": 24
+    }
+  },
+  "여의도점": {
+    "store": "여의도점",
+    "store_id": "GS010",
+    "weekly_sales": [
+      {
+        "week": 1,
+        "dosirak": 453,
+        "beverage": 1280,
+        "snack": 1110,
+        "household": 126
+      },
+      {
+        "week": 2,
+        "dosirak": 433,
+        "beverage": 1309,
+        "snack": 1019,
+        "household": 127
+      },
+      {
+        "week": 3,
+        "dosirak": 438,
+        "beverage": 1434,
+        "snack": 1024,
+        "household": 142
+      },
+      {
+        "week": 4,
+        "dosirak": 466,
+        "beverage": 1204,
+        "snack": 1139,
+        "household": 141
+      }
+    ],
+    "daily_average": {
+      "dosirak": 66,
+      "beverage": 189,
+      "snack": 148,
+      "household": 19
+    }
+  }
+}

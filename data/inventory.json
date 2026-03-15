@@ -1,0 +1,150 @@
+{
+  "역삼역점": {
+    "store": "역삼역점",
+    "store_id": "GS001",
+    "inventory": {
+      "dosirak": 240,
+      "beverage": 670,
+      "snack": 447,
+      "household": 20
+    },
+    "low_stock": [
+      "household"
+    ]
+  },
+  "잠실새내점": {
+    "store": "잠실새내점",
+    "store_id": "GS002",
+    "inventory": {
+      "dosirak": 96,
+      "beverage": 147,
+      "snack": 173,
+      "household": 8
+    },
+    "low_stock": [
+      "dosirak",
+      "beverage",
+      "snack",
+      "household"
+    ]
+  },
+  "테헤란로점": {
+    "store": "테헤란로점",
+    "store_id": "GS003",
+    "inventory": {
+      "dosirak": 105,
+      "beverage": 710,
+      "snack": 166,
+      "household": 70
+    },
+    "low_stock": [
+      "dosirak",
+      "snack"
+    ]
+  },
+  "홍대입구점": {
+    "store": "홍대입구점",
+    "store_id": "GS004",
+    "inventory": {
+      "dosirak": 146,
+      "beverage": 402,
+      "snack": 599,
+      "household": 103
+    },
+    "low_stock": [
+      "dosirak",
+      "beverage"
+    ]
+  },
+  "신촌역점": {
+    "store": "신촌역점",
+    "store_id": "GS005",
+    "inventory": {
+      "dosirak": 122,
+      "beverage": 452,
+      "snack": 96,
+      "household": 25
+    },
+    "low_stock": [
+      "dosirak",
+      "beverage",
+      "snack",
+      "household"
+    ]
+  },
+  "강남역점": {
+    "store": "강남역점",
+    "store_id": "GS006",
+    "inventory": {
+      "dosirak": 240,
+      "beverage": 439,
+      "snack": 299,
+      "household": 67
+    },
+    "low_stock": [
+      "beverage",
+      "snack"
+    ]
+  },
+  "잠실점": {
+    "store": "잠실점",
+    "store_id": "GS007",
+    "inventory": {
+      "dosirak": 23,
+      "beverage": 332,
+      "snack": 209,
+      "household": 55
+    },
+    "low_stock": [
+      "dosirak",
+      "beverage",
+      "snack"
+    ]
+  },
+  "석촌점": {
+    "store": "석촌점",
+    "store_id": "GS008",
+    "inventory": {
+      "dosirak": 40,
+      "beverage": 520,
+      "snack": 57,
+      "household": 15
+    },
+    "low_stock": [
+      "dosirak",
+      "snack",
+      "household"
+    ]
+  },
+  "선릉점": {
+    "store": "선릉점",
+    "store_id": "GS009",
+    "inventory": {
+      "dosirak": 155,
+      "beverage": 503,
+      "snack": 152,
+      "household": 16
+    },
+    "low_stock": [
+      "dosirak",
+      "beverage",
+      "snack",
+      "household"
+    ]
+  },
+  "여의도점": {
+    "store": "여의도점",
+    "store_id": "GS010",
+    "inventory": {
+      "dosirak": 222,
+      "beverage": 217,
+      "snack": 324,
+      "household": 57
+    },
+    "low_stock": [
+      "beverage",
+      "snack",
+      "household"
+    ]
+  }
+}

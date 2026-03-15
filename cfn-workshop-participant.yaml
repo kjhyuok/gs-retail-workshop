@@ -1,0 +1,398 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  GS Retail AI Agent Workshop - Participant Environment
+  EC2 (Streamlit UI + SQLite sample data) + EIP + IAM for AgentCore (Direct Code Deploy)
+  SA가 각 참가자 AWS 계정에 배포합니다. 참가자가 agentcore launch로 직접 배포 후 ARN을 연결합니다.
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Default: https://github.com/kjhyuok/gs-retail-workshop.git
+    Description: 'Streamlit UI + sample data GitHub repo (SA가 관리)'
+  InstanceType:
+    Type: String
+    Default: t4g.medium
+    AllowedValues: [t4g.small, t4g.medium, t4g.large]
+    Description: 'EC2 instance type (ARM64/Graviton)'
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+    Description: 'Amazon Linux 2023 ARM64 AMI'
+
+Resources:
+  # ======================================================
+  # S3: Sample Data (Agent Tool이 S3에서 읽을 수 있도록)
+  # ======================================================
+  SampleDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub gs-retail-workshop-data-${AWS::AccountId}
+      Tags:
+        - Key: Workshop
+          Value: gs-retail-agent
+
+  # ======================================================
+  # IAM: EC2 Role (Streamlit + AgentCore + S3 + Bedrock)
+  # ======================================================
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: WorkshopAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: AgentCore
+                Effect: Allow
+                Action: bedrock-agentcore:*
+                Resource: '*'
+              - Sid: AgentCoreControl
+                Effect: Allow
+                Action: bedrock-agentcore-control:*
+                Resource: '*'
+              - Sid: S3Access
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt SampleDataBucket.Arn
+                  - !Sub ${SampleDataBucket.Arn}/*
+              - Sid: PassRole
+                Effect: Allow
+                Action: iam:PassRole
+                Resource: !GetAtt AgentRuntimeRole.Arn
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref InstanceRole]
+
+  # ======================================================
+  # IAM: Agent Runtime Role (AgentCore에서 실행되는 Agent용)
+  # ======================================================
+  AgentRuntimeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub gs-retail-agent-runtime-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - bedrock.amazonaws.com
+                - bedrock-agentcore.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AgentRuntimeAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt SampleDataBucket.Arn
+                  - !Sub ${SampleDataBucket.Arn}/*
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource: '*'
+
+  # ======================================================
+  # Security Group: Streamlit (8501)
+  # ======================================================
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: GS Retail Workshop - Streamlit UI
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8501
+          ToPort: 8501
+          CidrIp: 0.0.0.0/0
+
+  # ======================================================
+  # EIP: 고정 IP (EC2 재시작해도 IP 유지)
+  # ======================================================
+  WorkshopEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: gs-retail-workshop-eip
+
+  EIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref EC2Instance
+      EIP: !Ref WorkshopEIP
+
+  # ======================================================
+  # EC2: Streamlit UI + SQLite + Sample Data
+  # 참가자는 이 EC2의 Streamlit UI에서 Agent ARN을 입력하여 연결
+  # ======================================================
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    DependsOn: [SampleDataBucket]
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref LatestAmiId
+      IamInstanceProfile: !Ref InstanceProfile
+      SecurityGroupIds: [!GetAtt SecurityGroup.GroupId]
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp3
+      Tags:
+        - Key: Name
+          Value: gs-retail-workshop-ui
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -ex
+          exec > /var/log/workshop-setup.log 2>&1
+
+          REGION=${AWS::Region}
+          ACCOUNT=${AWS::AccountId}
+          BUCKET=${SampleDataBucket}
+
+          # ============================================
+          # 1. System packages
+          # ============================================
+          dnf install -y python3.11 python3.11-pip git sqlite
+
+          # ============================================
+          # 2. Clone Streamlit UI repo
+          # ============================================
+          cd /home/ec2-user
+          git clone ${GitHubRepo} streamlit-ui || mkdir -p streamlit-ui
+          cd streamlit-ui
+
+          # ============================================
+          # 3. S3에 샘플 데이터 업로드 (Agent Tool용)
+          # ============================================
+          if [ -d "data" ]; then
+            for f in data/*.json; do
+              aws s3 cp "$f" s3://$BUCKET/sample-data/$(basename "$f") --region $REGION
+            done
+          fi
+
+          # ============================================
+          # 4. SQLite DB 생성 (샘플 데이터 로드)
+          # ============================================
+          python3.11 << 'PYEOF'
+          import json, sqlite3, os, glob
+
+          DB_PATH = "/home/ec2-user/streamlit-ui/workshop.db"
+          DATA_DIR = "/home/ec2-user/streamlit-ui/data"
+
+          conn = sqlite3.connect(DB_PATH)
+          c = conn.cursor()
+
+          # stores 테이블
+          c.execute("""CREATE TABLE IF NOT EXISTS stores (
+            store_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            area TEXT,
+            type TEXT
+          )""")
+
+          # inventory 테이블
+          c.execute("""CREATE TABLE IF NOT EXISTS inventory (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            store_id TEXT,
+            category TEXT NOT NULL,
+            product_name TEXT,
+            quantity INTEGER NOT NULL,
+            min_stock INTEGER DEFAULT 10,
+            FOREIGN KEY (store_id) REFERENCES stores(store_id)
+          )""")
+
+          # sales_history 테이블
+          c.execute("""CREATE TABLE IF NOT EXISTS sales_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            store_id TEXT,
+            category TEXT NOT NULL,
+            product_name TEXT,
+            quantity INTEGER NOT NULL,
+            sale_date TEXT NOT NULL,
+            FOREIGN KEY (store_id) REFERENCES stores(store_id)
+          )""")
+
+          # waste_rate 테이블
+          c.execute("""CREATE TABLE IF NOT EXISTS waste_rate (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            store_id TEXT,
+            category TEXT NOT NULL,
+            rate REAL NOT NULL,
+            period TEXT,
+            FOREIGN KEY (store_id) REFERENCES stores(store_id)
+          )""")
+
+          # weather_forecast 테이블
+          c.execute("""CREATE TABLE IF NOT EXISTS weather_forecast (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            location TEXT NOT NULL,
+            date TEXT NOT NULL,
+            weather TEXT NOT NULL,
+            temp_high INTEGER,
+            temp_low INTEGER,
+            precipitation_prob INTEGER
+          )""")
+
+          # events 테이블
+          c.execute("""CREATE TABLE IF NOT EXISTS events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_name TEXT NOT NULL,
+            date TEXT,
+            location TEXT,
+            impact_area TEXT,
+            impact_factor REAL DEFAULT 1.0
+          )""")
+
+          # JSON 데이터 로드
+          def load_json(name):
+            path = os.path.join(DATA_DIR, name)
+            if os.path.exists(path):
+              with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+            return None
+
+          # stores
+          stores = load_json("stores.json")
+          if stores:
+            items = stores if isinstance(stores, list) else stores.get("stores", [])
+            for s in items:
+              c.execute("INSERT OR IGNORE INTO stores VALUES (?,?,?,?)",
+                (s.get("store_id",""), s.get("name",""), s.get("area",""), s.get("type","")))
+
+          # inventory
+          inv = load_json("inventory.json")
+          if inv:
+            items = inv if isinstance(inv, list) else inv.get("inventory", [])
+            for item in items:
+              c.execute("INSERT INTO inventory (store_id, category, product_name, quantity, min_stock) VALUES (?,?,?,?,?)",
+                (item.get("store_id",""), item.get("category",""), item.get("product_name",""),
+                 item.get("quantity",0), item.get("min_stock",10)))
+
+          # sales_history
+          sales = load_json("sales_history.json")
+          if sales:
+            items = sales if isinstance(sales, list) else sales.get("sales", [])
+            for item in items:
+              c.execute("INSERT INTO sales_history (store_id, category, product_name, quantity, sale_date) VALUES (?,?,?,?,?)",
+                (item.get("store_id",""), item.get("category",""), item.get("product_name",""),
+                 item.get("quantity",0), item.get("sale_date","")))
+
+          # waste_rate
+          waste = load_json("waste_rate.json")
+          if waste:
+            items = waste if isinstance(waste, list) else waste.get("waste_rates", [])
+            for item in items:
+              c.execute("INSERT INTO waste_rate (store_id, category, rate, period) VALUES (?,?,?,?)",
+                (item.get("store_id",""), item.get("category",""), item.get("rate",0), item.get("period","")))
+
+          # weather_forecast
+          weather = load_json("weather_forecast.json")
+          if weather:
+            items = weather if isinstance(weather, list) else weather.get("forecasts", [])
+            for item in items:
+              c.execute("INSERT INTO weather_forecast (location, date, weather, temp_high, temp_low, precipitation_prob) VALUES (?,?,?,?,?,?)",
+                (item.get("location",""), item.get("date",""), item.get("weather",""),
+                 item.get("temp_high",0), item.get("temp_low",0), item.get("precipitation_prob",0)))
+
+          # events
+          events = load_json("events.json")
+          if events:
+            items = events if isinstance(events, list) else events.get("events", [])
+            for item in items:
+              c.execute("INSERT INTO events (event_name, date, location, impact_area, impact_factor) VALUES (?,?,?,?,?)",
+                (item.get("event_name",""), item.get("date",""), item.get("location",""),
+                 item.get("impact_area",""), item.get("impact_factor",1.0)))
+
+          conn.commit()
+          conn.close()
+          print(f"SQLite DB created: {DB_PATH}")
+          PYEOF
+
+          chown ec2-user:ec2-user /home/ec2-user/streamlit-ui/workshop.db
+
+          # ============================================
+          # 5. Python 의존성 설치
+          # ============================================
+          python3.11 -m pip install streamlit boto3 requests
+
+          # ============================================
+          # 6. Streamlit systemd 서비스
+          # ============================================
+          chown -R ec2-user:ec2-user /home/ec2-user/streamlit-ui
+
+          cat > /etc/systemd/system/streamlit.service << EOF
+          [Unit]
+          Description=GS Retail Workshop Streamlit UI
+          After=network.target
+          [Service]
+          Type=simple
+          User=ec2-user
+          WorkingDirectory=/home/ec2-user/streamlit-ui
+          EnvironmentFile=-/home/ec2-user/streamlit.env
+          Environment=SAMPLE_DATA_DIR=/home/ec2-user/streamlit-ui/data
+          Environment=SQLITE_DB_PATH=/home/ec2-user/streamlit-ui/workshop.db
+          Environment=S3_DATA_BUCKET=$BUCKET
+          Environment=AWS_DEFAULT_REGION=$REGION
+          ExecStart=/usr/local/bin/streamlit run app.py --server.port 8501 --server.headless true --server.address 0.0.0.0
+          Restart=always
+          RestartSec=3
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          systemctl daemon-reload
+          systemctl enable streamlit
+          systemctl start streamlit
+
+          # ============================================
+          # 7. 셋업 완료 마커
+          # ============================================
+          echo "SETUP_COMPLETE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" > /home/ec2-user/workshop-status.txt
+          echo "STREAMLIT_URL=http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):8501" >> /home/ec2-user/workshop-status.txt
+          echo "DEPLOY_METHOD=direct-code-upload" >> /home/ec2-user/workshop-status.txt
+          echo "S3_BUCKET=$BUCKET" >> /home/ec2-user/workshop-status.txt
+          echo "AGENT_RUNTIME_ROLE_ARN=${AgentRuntimeRole.Arn}" >> /home/ec2-user/workshop-status.txt
+          chown ec2-user:ec2-user /home/ec2-user/workshop-status.txt
+
+          echo "=== Workshop participant environment setup complete ==="
+
+Outputs:
+  StreamlitURL:
+    Description: 'Streamlit UI URL (EIP)'
+    Value: !Sub http://${WorkshopEIP}:8501
+  EIPAddress:
+    Description: 'Elastic IP (fixed)'
+    Value: !Ref WorkshopEIP
+  EC2InstanceId:
+    Description: 'EC2 Instance ID (SSM 접속용)'
+    Value: !Ref EC2Instance
+  SampleDataBucket:
+    Description: 'S3 Bucket (Agent Tool 데이터 소스)'
+    Value: !Ref SampleDataBucket
+  AgentRuntimeRoleArn:
+    Description: 'Agent Runtime IAM Role ARN (AgentCore 배포 시 사용)'
+    Value: !GetAtt AgentRuntimeRole.Arn
