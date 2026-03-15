@@ -107,6 +107,8 @@ cd gs-retail-agent
 ```
 
 ## Streamlit UI 기능
+![ui](participant-project/streamlit_ui_sample.png)
+
 
 ### 3-Panel 레이아웃
 - **좌측 사이드바**: Agent ARN 연결, 연결 상태, 카테고리별 빠른 질문
